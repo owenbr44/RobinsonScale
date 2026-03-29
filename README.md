@@ -74,14 +74,10 @@ This implies:
 
 ## Installation
 
+
 Install required packages:
 
 ```bash
 pip install numpy matplotlib
 
----
 
-# Author
-
-Owen Robinson
-MPA Candidate, Syracuse University
