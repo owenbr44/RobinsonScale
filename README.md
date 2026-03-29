@@ -81,7 +81,7 @@ pip install numpy matplotlib
 
 ---
 
-**## Author**
+# Author
 
 Owen Robinson
 MPA Candidate, Syracuse University
