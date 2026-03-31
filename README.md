@@ -38,12 +38,56 @@ The Robinson Scale assumes a normal distribution:
 This implies:
 
 | Range | Approx % | Meaning |
-|------|--------|--------|
+|------|----------|---------|
 | -1 to 1 | ~46% | Most experiences |
 | -2 to 2 | ~76% | Common variation |
 | -3 to 3 | ~92% | Strong but not rare |
 | -5 to 5 | ~99.7% | Full range |
 | ±5 | ~0.3% total | Extreme outcomes |
+
+---
+
+## Distribution in Practice
+
+To understand how the Robinson Scale works in reality, consider 100 randomly evaluated items:
+
+| Score | Approx Count (out of 100) |
+|------|---------------------------|
+| -5 | 1 |
+| -4 | 2 |
+| -3 | 8 |
+| -2 | 16 |
+| -1 | 23 |
+| 0  | 24 |
+| +1 | 23 |
+| +2 | 16 |
+| +3 | 8 |
+| +4 | 2 |
+| +5 | 1 |
+
+This highlights several key insights:
+
+- **Most things are neutral** — about 24% fall exactly at 0  
+- Nearly **70% of experiences fall between -1 and +1**  
+- Extreme values (**±5**) occur only about **1% of the time**
+
+---
+
+## Why This Matters
+
+We often forget how many things we feel neutral about.
+
+Traditional rating systems push us to label everything as good or bad, which leads to inflated scores. In reality:
+
+> Most experiences are simply *fine* — not memorable, not terrible, just expected.
+
+The Robinson Scale restores this balance by:
+
+- Giving neutrality a true center (**0**)  
+- Making extreme ratings rare and meaningful  
+- Encouraging more honest and calibrated evaluations  
+
+A score of **±5 should represent something truly exceptional or catastrophic**, not just “really good” or “really bad.”
 
 ---
 
@@ -74,10 +118,7 @@ This implies:
 
 ## Installation
 
-
 Install required packages:
 
 ```bash
 pip install numpy matplotlib
-
-
