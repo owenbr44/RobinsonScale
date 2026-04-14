@@ -1,5 +1,4 @@
 from pathlib import Path
-from scipy.stats import norm
 import pandas as pd
 import streamlit as st
 
@@ -103,6 +102,29 @@ if standard_row is not None and robinson_row is not None:
 - The **Robinson model** also shows **greater catalog diversity**, meaning it spreads recommendations across more distinct movies.
 
 That makes Robinson especially interesting for **discovery-oriented recommendation systems**.
+""")
+
+    st.markdown("""
+### Why Recall Matters Here
+
+In many recommendation systems, **precision** is treated as the main goal. Precision asks whether the recommended items are highly accurate.
+
+That is useful, but it often leads to:
+
+- repetitive recommendations
+- over-reliance on the safest popular choices
+- less exploration of the catalog
+
+For this project, the Robinson model is meant to support **discovery**, not just exact prediction.
+
+That makes **recall** especially important here. Higher recall means the system is surfacing **more items a user would actually like**, even if they are not all the most obvious or conservative choices.
+
+In other words:
+
+- **precision** favors safe recommendations
+- **recall** favors broader discovery
+
+The Robinson model should therefore be understood as a system that may trade some precision for a better ability to uncover relevant content.
 """)
 else:
     st.warning(
@@ -226,4 +248,8 @@ Traditional rating systems often compress everything into the positive end of th
 - something they genuinely loved
 
 The Robinson Scale re-centers ratings around **true neutrality**, which can make recommendation signals more meaningful for exploration and discovery.
+
+This app uses transformed data from a traditional rating system, not data that was originally collected on a true Robinson scale. That means this project is a proof of concept: it shows what happens when existing ratings are restructured around Robinson principles.
+
+A recommendation system built on data that was **originally collected from -5 to 5**, with 0 meaning truly neutral, would likely produce even stronger results because the signal would be cleaner from the start rather than reconstructed afterward.
 """)
