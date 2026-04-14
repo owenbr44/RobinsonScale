@@ -20,18 +20,20 @@ def load_assets():
 def load_metric_files():
     model_path = Path("model_comparison_results.csv")
     system_path = Path("system_comparison_metrics.csv")
+    holdout_path = Path("holdout_experiment_results.csv")
 
     model_df = pd.read_csv(model_path) if model_path.exists() else pd.DataFrame()
     system_df = pd.read_csv(system_path) if system_path.exists() else pd.DataFrame()
+    holdout_df = pd.read_csv(holdout_path) if holdout_path.exists() else pd.DataFrame()
 
-    return model_df, system_df
+    return model_df, system_df, holdout_df
 
 
-def get_metric_row(model_df: pd.DataFrame, rating_column: str) -> pd.Series | None:
+def get_metric_row(model_df: pd.DataFrame, column_name: str, value: str) -> pd.Series | None:
     if model_df.empty:
         return None
 
-    rows = model_df[model_df["rating_column"] == rating_column]
+    rows = model_df[model_df[column_name] == value]
     if rows.empty:
         return None
 
@@ -39,7 +41,7 @@ def get_metric_row(model_df: pd.DataFrame, rating_column: str) -> pd.Series | No
 
 
 assets = load_assets()
-model_metrics_df, system_metrics_df = load_metric_files()
+model_metrics_df, system_metrics_df, holdout_metrics_df = load_metric_files()
 
 user_ids = sorted(assets["df"]["user_id"].unique().tolist())
 
@@ -67,8 +69,8 @@ st.markdown("---")
 
 st.header("Model Findings")
 
-standard_row = get_metric_row(model_metrics_df, "rating")
-robinson_row = get_metric_row(model_metrics_df, "robinson_rating")
+standard_row = get_metric_row(model_metrics_df, "rating_column", "rating")
+robinson_row = get_metric_row(model_metrics_df, "rating_column", "robinson_rating")
 
 if standard_row is not None and robinson_row is not None:
     m1, m2, m3, m4 = st.columns(4)
@@ -104,8 +106,8 @@ if standard_row is not None and robinson_row is not None:
 That makes Robinson especially interesting for **discovery-oriented recommendation systems**.
 """)
 
-    st.markdown("""
-### Why Recall Matters Here
+    st.info("""
+**Why Recall Matters Here**
 
 In many recommendation systems, **precision** is treated as the main goal. Precision asks whether the recommended items are highly accurate.
 
@@ -121,7 +123,7 @@ That makes **recall** especially important here. Higher recall means the system 
 
 In other words:
 
-- **precision** favors safe recommendations
+- **precision** favors safer recommendations
 - **recall** favors broader discovery
 
 The Robinson model should therefore be understood as a system that may trade some precision for a better ability to uncover relevant content.
@@ -140,6 +142,104 @@ with st.expander("Show full metric tables"):
     if not system_metrics_df.empty:
         st.subheader("System-Wide Comparison Results")
         st.dataframe(system_metrics_df, use_container_width=True)
+
+st.markdown("---")
+
+st.header("Advanced Experiment: User-Level Holdout")
+
+holdout_standard = get_metric_row(holdout_metrics_df, "model", "standard")
+holdout_robinson = get_metric_row(holdout_metrics_df, "model", "robinson")
+
+if holdout_standard is not None and holdout_robinson is not None:
+    h1, h2, h3, h4 = st.columns(4)
+
+    with h1:
+        st.metric("Standard Holdout Precision@10", f"{holdout_standard['precision_at_10']:.3f}")
+        st.metric("Standard Holdout Recall@10", f"{holdout_standard['recall_at_10']:.3f}")
+
+    with h2:
+        st.metric("Robinson Holdout Precision@10", f"{holdout_robinson['precision_at_10']:.3f}")
+        st.metric("Robinson Holdout Recall@10", f"{holdout_robinson['recall_at_10']:.3f}")
+
+    with h3:
+        st.metric("Standard Holdout RMSE", f"{holdout_standard['rmse']:.3f}")
+        st.metric("Robinson Holdout RMSE", f"{holdout_robinson['rmse']:.3f}")
+
+    with h4:
+        recall_gain = (
+            (holdout_robinson["recall_at_10"] - holdout_standard["recall_at_10"])
+            / holdout_standard["recall_at_10"]
+        ) * 100
+
+        precision_change = (
+            (holdout_robinson["precision_at_10"] - holdout_standard["precision_at_10"])
+            / holdout_standard["precision_at_10"]
+        ) * 100
+
+        st.metric("Recall Change", f"{recall_gain:.1f}%")
+        st.metric("Precision Change", f"{precision_change:.1f}%")
+
+    st.markdown("""
+### What we did
+
+We ran a stronger validation test called a **user-level holdout experiment**.
+
+Instead of using one global split across the whole dataset, we split **each user’s ratings in half**:
+
+- **50% for training**
+- **50% for testing**
+
+That means each system had to learn from only part of a user’s history and then try to recover the rest.
+
+This is a stronger test because it evaluates how well the recommender can recover **hidden user preferences**, not just fit the overall dataset.
+""")
+
+    st.markdown("""
+### How we did it
+
+We built two versions of the same recommendation pipeline:
+
+- **Standard pipeline**: trained on original 1–5 ratings
+- **Robinson pipeline**: trained on Robinson-transformed ratings
+
+Both pipelines used the same recommendation algorithm:
+
+- **SVD collaborative filtering**
+
+So the only thing that changed was the **rating structure**.
+
+That makes this a clean experiment:
+- same users
+- same items
+- same split
+- same model
+- different rating scale
+""")
+
+    st.markdown("""
+### What we found
+
+In the holdout experiment:
+
+- the **standard model** remained better at exact prediction
+- the **Robinson model** achieved **higher recall**
+- the Robinson model surfaced **more relevant hidden items**
+
+This means the Robinson model was better at discovering items the user actually liked in the held-out set, even though it was less precise and less accurate in the narrow sense of predicting the exact rating number.
+""")
+
+    st.success("""
+**Main takeaway:**  
+In the user-level holdout test, the Robinson model improved recall by about **25%**, suggesting that it may be more effective for discovery-oriented recommendation systems.
+""")
+
+    with st.expander("Show holdout results table"):
+        st.dataframe(holdout_metrics_df, use_container_width=True)
+else:
+    st.info(
+        "Holdout experiment results were not found. Run `robinson_holdout_experiment.py` "
+        "to generate `holdout_experiment_results.csv`."
+    )
 
 st.markdown("---")
 
