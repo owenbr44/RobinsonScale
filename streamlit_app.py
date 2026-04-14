@@ -145,6 +145,101 @@ with st.expander("Show full metric tables"):
 
 st.markdown("---")
 
+st.header("User-Level Recommendation Comparison")
+
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    user_id = st.selectbox("Pick a user ID", user_ids, index=0)
+
+with c2:
+    mode = st.radio(
+        "Single-view mode",
+        ["standard", "robinson"],
+        horizontal=True
+    )
+
+with c3:
+    top_n = st.slider("Number of recommendations", min_value=5, max_value=20, value=10)
+
+if mode == "standard":
+    single_recs = get_top_n(
+        assets["original_algo"],
+        assets["original_trainset"],
+        user_id,
+        n=top_n,
+    )
+else:
+    single_recs = get_top_n(
+        assets["robinson_algo"],
+        assets["robinson_trainset"],
+        user_id,
+        n=top_n,
+    )
+
+single_df = recommendation_df(single_recs, assets["movie_titles"])
+
+st.subheader(f"Top {top_n} recommendations for user {user_id} ({mode})")
+st.dataframe(single_df, use_container_width=True)
+
+st.markdown("---")
+
+st.subheader("Side-by-Side Comparison")
+
+standard_recs = get_top_n(
+    assets["original_algo"],
+    assets["original_trainset"],
+    user_id,
+    n=top_n,
+)
+robinson_recs = get_top_n(
+    assets["robinson_algo"],
+    assets["robinson_trainset"],
+    user_id,
+    n=top_n,
+)
+
+standard_df = recommendation_df(standard_recs, assets["movie_titles"])
+robinson_df = recommendation_df(robinson_recs, assets["movie_titles"])
+
+left, right = st.columns(2)
+
+with left:
+    st.markdown("### Standard")
+    st.caption("Built from original 1–5 ratings.")
+    st.dataframe(standard_df, use_container_width=True)
+
+with right:
+    st.markdown("### Robinson")
+    st.caption("Built from Robinson-transformed ratings.")
+    st.dataframe(robinson_df, use_container_width=True)
+
+std_items = set(standard_df["item_id"].tolist())
+rob_items = set(robinson_df["item_id"].tolist())
+shared_items = std_items & rob_items
+user_overlap = len(shared_items) / len(std_items) if std_items else 0.0
+
+b1, b2, b3 = st.columns(3)
+
+with b1:
+    st.metric("User-Level Overlap", f"{user_overlap:.2f}")
+
+with b2:
+    st.metric("Shared Recommendations", len(shared_items))
+
+with b3:
+    st.metric("Different Recommendations", top_n - len(shared_items))
+
+st.markdown("""
+### What this means
+
+- A **high overlap** means Robinson is mostly re-ranking the same strong candidates.
+- A **lower overlap** means Robinson is introducing more different items.
+- In the full experiment, the average overlap across users was about **0.73**, so Robinson usually preserves the core recommendation set while still changing part of the list.
+""")
+
+st.markdown("---")
+
 st.header("Advanced Experiment: User-Level Holdout")
 
 holdout_standard = get_metric_row(holdout_metrics_df, "model", "standard")
@@ -240,101 +335,6 @@ else:
         "Holdout experiment results were not found. Run `robinson_holdout_experiment.py` "
         "to generate `holdout_experiment_results.csv`."
     )
-
-st.markdown("---")
-
-st.header("User-Level Recommendation Comparison")
-
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    user_id = st.selectbox("Pick a user ID", user_ids, index=0)
-
-with c2:
-    mode = st.radio(
-        "Single-view mode",
-        ["standard", "robinson"],
-        horizontal=True
-    )
-
-with c3:
-    top_n = st.slider("Number of recommendations", min_value=5, max_value=20, value=10)
-
-if mode == "standard":
-    single_recs = get_top_n(
-        assets["original_algo"],
-        assets["original_trainset"],
-        user_id,
-        n=top_n,
-    )
-else:
-    single_recs = get_top_n(
-        assets["robinson_algo"],
-        assets["robinson_trainset"],
-        user_id,
-        n=top_n,
-    )
-
-single_df = recommendation_df(single_recs, assets["movie_titles"])
-
-st.subheader(f"Top {top_n} recommendations for user {user_id} ({mode})")
-st.dataframe(single_df, use_container_width=True)
-
-st.markdown("---")
-
-st.subheader("Side-by-Side Comparison")
-
-standard_recs = get_top_n(
-    assets["original_algo"],
-    assets["original_trainset"],
-    user_id,
-    n=top_n,
-)
-robinson_recs = get_top_n(
-    assets["robinson_algo"],
-    assets["robinson_trainset"],
-    user_id,
-    n=top_n,
-)
-
-standard_df = recommendation_df(standard_recs, assets["movie_titles"])
-robinson_df = recommendation_df(robinson_recs, assets["movie_titles"])
-
-left, right = st.columns(2)
-
-with left:
-    st.markdown("### Standard")
-    st.caption("Built from original 1–5 ratings.")
-    st.dataframe(standard_df, use_container_width=True)
-
-with right:
-    st.markdown("### Robinson")
-    st.caption("Built from Robinson-transformed ratings.")
-    st.dataframe(robinson_df, use_container_width=True)
-
-std_items = set(standard_df["item_id"].tolist())
-rob_items = set(robinson_df["item_id"].tolist())
-shared_items = std_items & rob_items
-user_overlap = len(shared_items) / len(std_items) if std_items else 0.0
-
-b1, b2, b3 = st.columns(3)
-
-with b1:
-    st.metric("User-Level Overlap", f"{user_overlap:.2f}")
-
-with b2:
-    st.metric("Shared Recommendations", len(shared_items))
-
-with b3:
-    st.metric("Different Recommendations", top_n - len(shared_items))
-
-st.markdown("""
-### What this means
-
-- A **high overlap** means Robinson is mostly re-ranking the same strong candidates.
-- A **lower overlap** means Robinson is introducing more different items.
-- In the full experiment, the average overlap across users was about **0.73**, so Robinson usually preserves the core recommendation set while still changing part of the list.
-""")
 
 st.markdown("---")
 
