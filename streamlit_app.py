@@ -1,5 +1,4 @@
 from pathlib import Path
-from scipy.stats import norm
 import pandas as pd
 import streamlit as st
 
