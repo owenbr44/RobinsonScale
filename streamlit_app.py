@@ -210,6 +210,112 @@ label[data-testid="stWidgetLabel"] {
     margin-top: 0.4rem;
     font-style: italic;
 }
+
+/* ── Intro / explainer cards ── */
+.intro-card {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+    height: 100%;
+}
+.intro-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    color: #1a202c;
+    margin: 0 0 0.6rem 0;
+}
+.intro-card p, .intro-card li {
+    font-size: 0.9rem;
+    color: #4a5568;
+    line-height: 1.65;
+    margin: 0.2rem 0;
+}
+.intro-card ul { padding-left: 1.2rem; margin: 0.4rem 0 0 0; }
+
+/* ── Score table ── */
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+}
+.score-table th {
+    background: #edf2f7;
+    color: #4a5568;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.55rem 0.9rem;
+    text-align: left;
+}
+.score-table td {
+    padding: 0.5rem 0.9rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #2d3748;
+}
+.score-table tr:last-child td { border-bottom: none; }
+.score-table tr:hover td { background: #f7fafc; }
+.score-pos { color: #276749; font-weight: 700; }
+.score-neg { color: #9b2c2c; font-weight: 700; }
+.score-zero { color: #2c5282; font-weight: 700; }
+
+/* ── Distribution bar ── */
+.dist-bar-wrap { margin: 0.3rem 0; }
+.dist-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+}
+.dist-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.95rem;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}
+.dist-bar-bg {
+    flex: 1;
+    background: #edf2f7;
+    border-radius: 4px;
+    height: 18px;
+    overflow: hidden;
+}
+.dist-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+.dist-count {
+    font-size: 0.78rem;
+    color: #718096;
+    width: 40px;
+    flex-shrink: 0;
+}
+
+/* ── Stat foundation pills ── */
+.stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+}
+.stat-chip {
+    background: #1a1a2e;
+    color: #63b3ed;
+    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+}
+.stat-chip span {
+    color: #a0aec0;
+    font-weight: 400;
+    margin-left: 4px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -258,6 +364,118 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
+
+# ── Robinson Scale Intro ──────────────────────────────────────────────────────
+st.markdown("""
+<p class="section-header">The Robinson Scale</p>
+<div class="section-divider"></div>
+""", unsafe_allow_html=True)
+
+intro_c1, intro_c2, intro_c3 = st.columns(3, gap="large")
+
+with intro_c1:
+    st.markdown("""
+<div class="intro-card">
+    <p class="intro-card-title">The Problem</p>
+    <p>Most rating systems are broken by <strong>score inflation</strong>. People rate things 7, 8, or 9 out of 10 even when they're genuinely average — compressing everything into the top of the scale and making it nearly impossible to tell good from great.</p>
+    <p style="margin-top:0.8rem;">Traditional scales also have no true neutral. A 5 out of 10 <em>sounds</em> like the middle, but in practice nobody uses it that way.</p>
+</div>
+""", unsafe_allow_html=True)
+
+with intro_c2:
+    st.markdown("""
+<div class="intro-card">
+    <p class="intro-card-title">The Key Idea</p>
+    <p><strong>Most things are average.</strong> The Robinson Scale is built around this truth.</p>
+    <ul>
+        <li><strong>0</strong> = expected, unremarkable, baseline</li>
+        <li><strong>Positive values</strong> = above average</li>
+        <li><strong>Negative values</strong> = below average</li>
+        <li><strong>±5</strong> = truly extreme — exceptional or catastrophic</li>
+    </ul>
+    <p style="margin-top:0.8rem;">By centering the scale at zero, neutrality becomes meaningful rather than something to avoid.</p>
+</div>
+""", unsafe_allow_html=True)
+
+with intro_c3:
+    st.markdown("""
+<div class="intro-card">
+    <p class="intro-card-title">Statistical Foundation</p>
+    <p>The scale assumes a <strong>normal distribution</strong> of human evaluations:</p>
+    <div class="stat-row">
+        <div class="stat-chip">μ = 0 <span>mean</span></div>
+        <div class="stat-chip">σ ≈ 1.67 <span>std dev</span></div>
+        <div class="stat-chip">±3σ <span>full range</span></div>
+    </div>
+    <p style="margin-top:0.9rem; font-size:0.85rem; color:#718096;">This means ~46% of ratings fall between -1 and +1, ~76% between -2 and +2, and extreme values (±5) occur only ~0.3% of the time.</p>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Score interpretation + distribution side by side
+score_col, dist_col = st.columns([1, 1], gap="large")
+
+with score_col:
+    st.markdown("""
+<p style="font-family:'DM Serif Display',serif; font-size:1.05rem; color:#1a202c; margin-bottom:0.6rem;">Score Interpretation</p>
+<table class="score-table">
+    <thead><tr><th>Score</th><th>What it means</th></tr></thead>
+    <tbody>
+        <tr><td><span class="score-neg">−5</span></td><td>Extreme — catastrophic, life-altering</td></tr>
+        <tr><td><span class="score-neg">−4</span></td><td>Rare — deeply negative, exceptional</td></tr>
+        <tr><td><span class="score-neg">−3</span></td><td>Strong — memorable in a bad way</td></tr>
+        <tr><td><span class="score-neg">−2</span></td><td>Clearly noticeable, below average</td></tr>
+        <tr><td><span class="score-neg">−1</span></td><td>Slightly below average</td></tr>
+        <tr><td><span class="score-zero">0</span></td><td>Neutral — expected, unremarkable</td></tr>
+        <tr><td><span class="score-pos">+1</span></td><td>Slightly above average</td></tr>
+        <tr><td><span class="score-pos">+2</span></td><td>Clearly noticeable, above average</td></tr>
+        <tr><td><span class="score-pos">+3</span></td><td>Strong — memorable in a good way</td></tr>
+        <tr><td><span class="score-pos">+4</span></td><td>Rare — deeply positive, exceptional</td></tr>
+        <tr><td><span class="score-pos">+5</span></td><td>Extreme — life-altering, unforgettable</td></tr>
+    </tbody>
+</table>
+""", unsafe_allow_html=True)
+
+with dist_col:
+    st.markdown("""
+<p style="font-family:'DM Serif Display',serif; font-size:1.05rem; color:#1a202c; margin-bottom:0.6rem;">Distribution in Practice <span style="font-family:'DM Sans',sans-serif; font-size:0.78rem; color:#a0aec0; font-weight:400;">(per 100 items)</span></p>
+""", unsafe_allow_html=True)
+
+    dist_data = [
+        ("-5", 1,  "#9b2c2c", "#fc8181"),
+        ("-4", 2,  "#9b2c2c", "#fc8181"),
+        ("-3", 8,  "#c05621", "#fbd38d"),
+        ("-2", 16, "#c05621", "#fbd38d"),
+        ("-1", 23, "#744210", "#fefcbf"),
+        ("0",  24, "#1a365d", "#63b3ed"),
+        ("+1", 23, "#276749", "#9ae6b4"),
+        ("+2", 16, "#276749", "#9ae6b4"),
+        ("+3", 8,  "#1a4731", "#68d391"),
+        ("+4", 2,  "#1a4731", "#68d391"),
+        ("+5", 1,  "#1a4731", "#68d391"),
+    ]
+
+    bars_html = '<div class="dist-bar-wrap">'
+    for label, count, _, color in dist_data:
+        pct = count / 24 * 100  # normalize to max (0 = 24)
+        label_class = "score-zero" if label == "0" else ("score-pos" if label.startswith("+") else "score-neg")
+        bars_html += f"""
+        <div class="dist-row">
+            <span class="dist-label {label_class}">{label}</span>
+            <div class="dist-bar-bg">
+                <div class="dist-bar-fill" style="width:{pct}%; background:{color};"></div>
+            </div>
+            <span class="dist-count">{count} / 100</span>
+        </div>"""
+    bars_html += "</div>"
+    bars_html += """<p style="font-size:0.78rem; color:#a0aec0; margin-top:0.8rem; font-style:italic;">
+        ~24% of items score exactly 0 &nbsp;·&nbsp; ~70% fall between −1 and +1 &nbsp;·&nbsp; ±5 occurs ~1% of the time
+    </p>"""
+
+    st.markdown(bars_html, unsafe_allow_html=True)
+
+st.markdown("<hr>", unsafe_allow_html=True)
 
 # ── What this app does ────────────────────────────────────────────────────────
 left_col, right_col = st.columns([3, 2], gap="large")
