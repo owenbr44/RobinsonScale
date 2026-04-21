@@ -4,6 +4,10 @@ A statistically grounded rating system that replaces traditional 0–10 scales w
 
 ---
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://robinsonscale-njchyytveugwgme52pfm2k.streamlit.app/)
+
+A statistically grounded rating system...
+
 ## Overview
 
 Most rating systems are flawed because they become inflated — people tend to rate things as 7, 8, or 9 even when they are average.
